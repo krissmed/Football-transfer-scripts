@@ -1,4 +1,4 @@
-# Transfermarkt webscraping scripts
+# Transfermarkt webscraping script
 Scripts that scrape the latest transfer data from [transfermarkt](transfermarkt.com). 
 
 ## Before running/requirements
