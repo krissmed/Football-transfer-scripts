@@ -1,5 +1,5 @@
 # Transfermarkt webscraping scripts
-Scripts that scrape the latest transfer data from [transfermarkt](transfermarkt.com). 
+Scripts that scrape the latest transfer data from [transfermarkt](https://www.transfermarkt.com/). 
 
 ## Before running/requirements
 Before running the script, run the following command
