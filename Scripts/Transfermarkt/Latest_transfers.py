@@ -1,25 +1,32 @@
 #Imports
+from logging import exception
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
 
-def extract_data(soup):
-    data = []
-    players = []
-    #Extracting player information
-    #The table uses either class odd or even on the player lines
-    players.append(soup.find_all('tr', {'class' : 'odd'}))
-    players.append(soup.find_all('tr', {'class' : 'even'}))
-    print(players)
 
+def make_list(soup):
+    players = []
+    for player in soup.find_all('tr', {'class' : 'odd'}):
+        players.append(player)
+
+    for player in soup.find_all('tr', {'class' : 'even'}):
+        players.append(player)
+        
+    return players
+
+
+def extract_data(players):
+    data = []
 
     for player in players:
         new_data = extract(player)
         data.append(new_data)
 
     #Creating a new table and adding data
-    df = pd.DataFrame(data=data, columns=["Name", "Player_id", "Position", "Age", "Nationality", "Transfer from", "Transfer to", "Transfer date", "Transfer type"])
+    df = pd.DataFrame(data=data, columns=["Name", "Player_id", "Position", "Age", "Nationality", "Transfer from", "Transfer to", "Transfer date", "Transfer type/fee"])
     return df
+
 
 def extract(players):
     new_data = []
@@ -58,19 +65,19 @@ def extract(players):
     # Adding transfer type/fee
     transferType = players.find_all('td' , {'class' : 'rechts hauptlink'})[0].text
     new_data.append(transferType)
-    print(new_data) 
     return new_data
 
 
 
 def export_data(df):
     #Export to json/csv
+    print(df)
     try:
-        df.to_csv('Latest Transfer.csv', index = False)
+        df.to_csv('./../../Output/Latest_Transfer.csv', index = False)
 
-        df.to_json('Latest transfers.json',orient="index")
-    except:
-        print("Error exporting data")
+        df.to_json('./../../Output/Latest_Transfers.json',orient="index")
+    except Exception as e:
+        print(e)
 
 
 def main():
@@ -80,7 +87,8 @@ def main():
     html_content = requests.get(url, headers = {'User-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}).text 
     # Parse the html content
     soup = BeautifulSoup(html_content, "lxml")
-    df = extract_data(soup)
+    players = make_list(soup)
+    df = extract_data(players)
     export_data(df)
 
 if __name__ == "__main__":
