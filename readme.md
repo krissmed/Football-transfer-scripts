@@ -2,12 +2,9 @@
 Scripts that scrape the latest transfer data from [transfermarkt](transfermarkt.com). 
 
 ## Before running/requirements
-Before running the script, run the following commands
+Before running the script, run the following command
 ``` python
-pip3 install requests
-pip3 install pandas
-pip3 install beautifulsoup4
-pip3 install lxml
+pip3 install -r requirements.txt
 ```
 
 ## Running the scripts
