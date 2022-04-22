@@ -11,6 +11,6 @@ pip3 install lxml
 ```
 
 ## Running the scripts
-```
+``` python
 python3 ./Latest_transfers.py 
 ```

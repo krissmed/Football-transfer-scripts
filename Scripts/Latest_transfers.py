@@ -5,30 +5,36 @@ import pandas as pd
 from bs4 import BeautifulSoup
 
 
-def make_list(soup):
+def make_list(): # Returns a list of all players
     players = []
-    for player in soup.find_all('tr', {'class' : 'odd'}):
-        players.append(player)
+    # For loop, runs through all pages
+    for i in range(1, 11):
+        url=(f"https://www.transfermarkt.com/transfers/neuestetransfers/statistik?ajax=yw1&land_id=0&maxMarktwert=200000000&minMarktwert=0&plus=1&wettbewerb_id=alle&page={i}")
+        # Make a GET request to fetch the raw HTML content
+        html_content = requests.get(url, headers = {'User-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}).text 
+        # Parse the html content
+        soup = BeautifulSoup(html_content, "lxml")
+        for player in soup.find_all('tr', {'class' : 'odd'}):
+            players.append(player)
 
-    for player in soup.find_all('tr', {'class' : 'even'}):
-        players.append(player)
-        
+        for player in soup.find_all('tr', {'class' : 'even'}):
+            players.append(player)
+            
     return players
 
 
-def extract_data(players):
+def extract_data(players): # Returns a dataframe of all players
     data = []
 
     for player in players:
         new_data = extract(player)
         data.append(new_data)
 
-    #Creating a new table and adding data
     df = pd.DataFrame(data=data, columns=["Name", "Player_id", "Position", "Age", "Nationality", "Transfer from", "Transfer to", "Transfer date", "Transfer type/fee"])
     return df
 
 
-def extract(players):
+def extract(players): # Extracts data from a player
     new_data = []
     # Adding name to table
     name = players.find('img', {'class' : 'bilderrahmen-fixed lazy lazy'})['alt']
@@ -68,28 +74,20 @@ def extract(players):
     return new_data
 
 
-
-def export_data(df):
-    #Export to json/csv
-    print(df)
+def export_data(df): #Export to json or csv
     try:
-        df.to_csv('./../../Output/Latest_Transfer.csv', index = False)
+        df.to_csv('Output.csv', index = False)
 
-        df.to_json('./../../Output/Latest_Transfers.json',orient="index")
+        df.to_json('Output.json',orient="index")
     except Exception as e:
         print(e)
 
 
 def main():
-    #Extracting half the data to a list
-    url=(f"https://www.transfermarkt.com/transfers/neuestetransfers/statistik?ajax=yw1&land_id=0&maxMarktwert=200000000&minMarktwert=0&plus=1&wettbewerb_id=alle&page=1")
-    # Make a GET request to fetch the raw HTML content
-    html_content = requests.get(url, headers = {'User-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}).text 
-    # Parse the html content
-    soup = BeautifulSoup(html_content, "lxml")
-    players = make_list(soup)
+    players = make_list()
     df = extract_data(players)
     export_data(df)
+
 
 if __name__ == "__main__":
     main()
