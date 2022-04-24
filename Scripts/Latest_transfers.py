@@ -11,7 +11,8 @@ def make_list():  # Returns a list of all players
     players = []
     # Runs through all pages
     for i in range(1, 11):
-        url = (f"https://www.transfermarkt.com/transfers/neuestetransfers/statistik?ajax=yw1&land_id=0&maxMarktwert=200000000&minMarktwert=0&plus=1&wettbewerb_id=alle&page=1")
+        url = (
+            f"https://www.transfermarkt.com/transfers/neuestetransfers/statistik/plus/?plus=1&galerie=0&wettbewerb_id=alle&land_id=&minMarktwert=0&maxMarktwert=200.000.000&yt0=Show&&page={i}")
         # Make a GET request to fetch the raw HTML content
         html_content = requests.get(url, headers={
                                     'User-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}).text
@@ -20,8 +21,11 @@ def make_list():  # Returns a list of all players
         for player in soup.find_all('tr', {'class': 'odd'}):
             players.append(player)
 
+        counter = ((i-1)*25)+1
+
         for player in soup.find_all('tr', {'class': 'even'}):
-            players.append(player)
+            players.insert(counter, player)
+            counter += 2
 
     return players
 
@@ -76,12 +80,18 @@ def extract(player):  # Extracts data from a player
     # Adding transfer club from
     clubFrom = player.find('img', {'class': 'tiny_wappen'})['alt']
 
-    clubFrom_id = player.find('a', {'title': clubFrom})['href'].split('/')[4]
+    if clubFrom == "Retired" or clubFrom == "Career break":
+        clubFrom_id = "Null"
+    else:
+        clubFrom_id = player.find('a', {'title': clubFrom})['href'].split('/')[4]
 
     # Adding transfer club to
     clubTo = player.find_all('img', {'class': 'tiny_wappen'})[1]['alt']
 
-    clubTo_id = player.find('a', {'title': clubTo})['href'].split('/')[4]
+    if clubTo == "Retired" or clubTo == "Career break":
+        clubTo_id = "Null"
+    else:
+        clubTo_id = player.find('a', {'title': clubTo})['href'].split('/')[4]
 
     # Adding transfer date
     transferDate = player.find_all('td', {'class': 'zentriert'})[2].text
@@ -184,4 +194,7 @@ if __name__ == "__main__":
     last_id = get_last_id()
     players = make_list()
     df = extract_data(players)
-    export_data(df)
+    if len(df.index) == 0: # Doesn't write a new file if there is no new data
+        print("[ERROR] No new transfers")
+    else: 
+        export_data(df)
