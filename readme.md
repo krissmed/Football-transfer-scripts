@@ -4,7 +4,7 @@ Scripts that scrape the latest transfer data from [transfermarkt](https://www.tr
 ## Before running/requirements
 Before running the script, run the following command
 ``` python
-pip3 install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 ## Running the scripts
