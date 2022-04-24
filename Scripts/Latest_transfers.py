@@ -11,7 +11,7 @@ def make_list():  # Returns a list of all players
     players = []
     # Runs through all pages
     for i in range(1, 11):
-        url = (f"https://www.transfermarkt.com/transfers/neuestetransfers/statistik?ajax=yw1&land_id=0&maxMarktwert=200000000&minMarktwert=0&plus=1&wettbewerb_id=alle&page=1")
+        url = (f"https://www.transfermarkt.com/transfers/neuestetransfers/statistik?land_id=0&wettbewerb_id=alle&minMarktwert=0&maxMarktwert=200000000&plus={i}")
         # Make a GET request to fetch the raw HTML content
         html_content = requests.get(url, headers={
                                     'User-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}).text
@@ -19,9 +19,11 @@ def make_list():  # Returns a list of all players
         soup = BeautifulSoup(html_content, "lxml")
         for player in soup.find_all('tr', {'class': 'odd'}):
             players.append(player)
+        counter = 1
 
         for player in soup.find_all('tr', {'class': 'even'}):
-            players.append(player)
+            players.insert(counter, player)
+            counter += 2
 
     return players
 
@@ -50,14 +52,6 @@ def extract(player):  # Extracts data from a player
     # Adding transfermarkt id to the table
     player_id = player.find('a', {'title': name})['href'].split('/')[4]
 
-    date_joined, contract_length, full_name = getting_player_details(
-        player, name)  # Getting player details form player profile
-
-    if last_id is not False:
-        # Checks if the player is already in the list
-        if check_player_id(player_id) == False:
-            return False  # If the player is already in the list, return false
-
     # Adding position to table
     position = player.find_all('td', {'class': ''})[2].text
 
@@ -71,17 +65,26 @@ def extract(player):  # Extracts data from a player
     if len(player.find_all('img', {'class': 'flaggenrahmen'})) > 3:
         secNat = player.find_all('img', {'class': 'flaggenrahmen'})[1]['title']
     else:
-        secNat = "N/A"
+        secNat = "Null"
 
     # Adding transfer club from
     clubFrom = player.find('img', {'class': 'tiny_wappen'})['alt']
 
-    clubFrom_id = player.find('a', {'title': clubFrom})['href'].split('/')[4]
+    # Adding club from id
+    if clubFrom == "Retired" or clubFrom == "Career break":
+        clubFrom_id = "Null"
+    else:
+        clubFrom_id = player.find('a', {'title': clubFrom})[
+        'href'].split('/')[4]
 
     # Adding transfer club to
     clubTo = player.find_all('img', {'class': 'tiny_wappen'})[1]['alt']
 
-    clubTo_id = player.find('a', {'title': clubTo})['href'].split('/')[4]
+    # Adding clubTo id
+    if clubTo == "Retired" or clubTo == "Career break":
+        clubTo_id = "Null"
+    else:
+        clubTo_id = player.find('a', {'title': clubTo})['href'].split('/')[4]
 
     # Adding transfer date
     transferDate = player.find_all('td', {'class': 'zentriert'})[2].text
@@ -89,6 +92,15 @@ def extract(player):  # Extracts data from a player
     # Adding transfer type/fee
     transferType = player.find_all('td', {'class': 'rechts hauptlink'})[0].text
 
+    if last_transfer is not False:
+        # Checks if the player is already in the list
+        if check_last_transfer(player_id, clubFrom_id, clubTo_id) == False:
+            return False  # If the player is already in the list, return false¨
+
+    date_joined, contract_length, full_name = getting_player_details(
+        player, name)  # Getting player details form player profile
+
+    # Adding data to list
     new_data.append(player_id)
     new_data.append(name)
     new_data.append(full_name)
@@ -128,7 +140,7 @@ def getting_player_details(player, name):
             full_name = player_data_list[counter].text
             break
         else:
-            full_name = "N/A"
+            full_name = "Null"
         counter += 1
 
     counter = 0  # Reset the counter to 0
@@ -162,14 +174,14 @@ def export_data(df):  # Export to json or csv
 
 
 # Removes players that are already in the list
-def check_player_id(player_id):
-    if player_id == last_id:
+def check_last_transfer(player_id, clubFrom_id, clubTo_id):
+    if [player_id, clubFrom_id, clubTo_id] == last_transfer:
         return False
     else:
         return True
 
 
-last_id = False
+last_transfer = False
 
 
 def get_last_id():
@@ -177,11 +189,11 @@ def get_last_id():
         f = open('Latest_transfers.json')
         data = json.load(f)
         if len(data) > 0:
-            return data[str(0)]['Player_id']
+            return [data[str(0)]['Player_id'], data[str(0)]['From club id'], data[str(0)]['To club id']]
 
 
 if __name__ == "__main__":
-    last_id = get_last_id()
+    last_transfer = get_last_id()
     players = make_list()
     df = extract_data(players)
     export_data(df)
