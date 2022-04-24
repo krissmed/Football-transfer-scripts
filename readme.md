@@ -9,5 +9,6 @@ pip3 install -r requirements.txt
 
 ## Running the scripts
 ``` python
-python3 ./Latest_transfers.py 
+python ./Latest_transfers.py
+python ./Contract_extensions.py
 ```
