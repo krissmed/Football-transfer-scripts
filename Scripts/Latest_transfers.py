@@ -11,7 +11,8 @@ def make_list():  # Returns a list of all players
     players = []
     # Runs through all pages
     for i in range(1, 11):
-        url = (f"https://www.transfermarkt.com/transfers/neuestetransfers/statistik?land_id=0&wettbewerb_id=alle&minMarktwert=0&maxMarktwert=200000000&plus={i}")
+        url = (
+            f"https://www.transfermarkt.com/transfers/neuestetransfers/statistik/plus/?plus=1&galerie=0&wettbewerb_id=alle&land_id=&minMarktwert=0&maxMarktwert=200.000.000&yt0=Show&&page={i}")
         # Make a GET request to fetch the raw HTML content
         html_content = requests.get(url, headers={
                                     'User-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}).text
@@ -20,6 +21,8 @@ def make_list():  # Returns a list of all players
         for player in soup.find_all('tr', {'class': 'odd'}):
             players.append(player)
         counter = 1
+
+        counter = ((i-1)*25)+1
 
         for player in soup.find_all('tr', {'class': 'even'}):
             players.insert(counter, player)
@@ -75,12 +78,13 @@ def extract(player):  # Extracts data from a player
         clubFrom_id = "Null"
     else:
         clubFrom_id = player.find('a', {'title': clubFrom})[
-        'href'].split('/')[4]
+            'href'].split('/')[4]
 
     # Adding transfer club to
     clubTo = player.find_all('img', {'class': 'tiny_wappen'})[1]['alt']
 
     # Adding clubTo id
+
     if clubTo == "Retired" or clubTo == "Career break":
         clubTo_id = "Null"
     else:
@@ -166,9 +170,11 @@ def getting_player_details(player, name):
 
 def export_data(df):  # Export to json or csv
     try:
-        df.to_csv('Latest_transfers.csv', index=False)
+        if not os.path.exists("../Output"):
+            os.mkdir("../Output")
+        df.to_csv('../Output/Latest_transfers.csv', index=False)
 
-        df.to_json('Latest_transfers.json', orient="index")
+        df.to_json('../Output/Latest_transfers.json', orient="index")
     except Exception as e:
         print(e)
 
@@ -185,8 +191,8 @@ last_transfer = False
 
 
 def get_last_id():
-    if os.path.isfile('Latest_transfers.json'):  # Checks if the file exists
-        f = open('Latest_transfers.json')
+    if os.path.isfile('../Output/Latest_transfers.json'):  # Checks if the file exists
+        f = open('../Output/Latest_transfers.json')
         data = json.load(f)
         if len(data) > 0:
             return [data[str(0)]['Player_id'], data[str(0)]['From club id'], data[str(0)]['To club id']]
@@ -196,4 +202,7 @@ if __name__ == "__main__":
     last_transfer = get_last_id()
     players = make_list()
     df = extract_data(players)
-    export_data(df)
+    if len(df.index) == 0:  # Doesn't write a new file if there is no new data
+        print("[ERROR] No new transfers")
+    else:
+        export_data(df)
