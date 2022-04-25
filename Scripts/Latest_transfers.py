@@ -20,6 +20,7 @@ def make_list():  # Returns a list of all players
         soup = BeautifulSoup(html_content, "lxml")
         for player in soup.find_all('tr', {'class': 'odd'}):
             players.append(player)
+        counter = 1
 
         counter = ((i-1)*25)+1
 
@@ -54,14 +55,6 @@ def extract(player):  # Extracts data from a player
     # Adding transfermarkt id to the table
     player_id = player.find('a', {'title': name})['href'].split('/')[4]
 
-    date_joined, contract_length, full_name = getting_player_details(
-        player, name)  # Getting player details form player profile
-
-    if last_id is not False:
-        # Checks if the player is already in the list
-        if check_player_id(player_id) == False:
-            return False  # If the player is already in the list, return false
-
     # Adding position to table
     position = player.find_all('td', {'class': ''})[2].text
 
@@ -75,18 +68,22 @@ def extract(player):  # Extracts data from a player
     if len(player.find_all('img', {'class': 'flaggenrahmen'})) > 3:
         secNat = player.find_all('img', {'class': 'flaggenrahmen'})[1]['title']
     else:
-        secNat = "N/A"
+        secNat = "Null"
 
     # Adding transfer club from
     clubFrom = player.find('img', {'class': 'tiny_wappen'})['alt']
 
+    # Adding club from id
     if clubFrom == "Retired" or clubFrom == "Career break":
         clubFrom_id = "Null"
     else:
-        clubFrom_id = player.find('a', {'title': clubFrom})['href'].split('/')[4]
+        clubFrom_id = player.find('a', {'title': clubFrom})[
+            'href'].split('/')[4]
 
     # Adding transfer club to
     clubTo = player.find_all('img', {'class': 'tiny_wappen'})[1]['alt']
+
+    # Adding clubTo id
 
     if clubTo == "Retired" or clubTo == "Career break":
         clubTo_id = "Null"
@@ -99,6 +96,15 @@ def extract(player):  # Extracts data from a player
     # Adding transfer type/fee
     transferType = player.find_all('td', {'class': 'rechts hauptlink'})[0].text
 
+    if last_transfer is not False:
+        # Checks if the player is already in the list
+        if check_last_transfer(player_id, clubFrom_id, clubTo_id) == False:
+            return False  # If the player is already in the list, return false¨
+
+    date_joined, contract_length, full_name = getting_player_details(
+        player, name)  # Getting player details form player profile
+
+    # Adding data to list
     new_data.append(player_id)
     new_data.append(name)
     new_data.append(full_name)
@@ -138,7 +144,7 @@ def getting_player_details(player, name):
             full_name = player_data_list[counter].text
             break
         else:
-            full_name = "N/A"
+            full_name = "Null"
         counter += 1
 
     counter = 0  # Reset the counter to 0
@@ -164,37 +170,39 @@ def getting_player_details(player, name):
 
 def export_data(df):  # Export to json or csv
     try:
-        df.to_csv('Latest_transfers.csv', index=False)
+        if not os.path.exists("../Output"):
+            os.mkdir("../Output")
+        df.to_csv('../Output/Latest_transfers.csv', index=False)
 
-        df.to_json('Latest_transfers.json', orient="index")
+        df.to_json('../Output/Latest_transfers.json', orient="index")
     except Exception as e:
         print(e)
 
 
 # Removes players that are already in the list
-def check_player_id(player_id):
-    if player_id == last_id:
+def check_last_transfer(player_id, clubFrom_id, clubTo_id):
+    if [player_id, clubFrom_id, clubTo_id] == last_transfer:
         return False
     else:
         return True
 
 
-last_id = False
+last_transfer = False
 
 
 def get_last_id():
-    if os.path.isfile('Latest_transfers.json'):  # Checks if the file exists
-        f = open('Latest_transfers.json')
+    if os.path.isfile('../Output/Latest_transfers.json'):  # Checks if the file exists
+        f = open('../Output/Latest_transfers.json')
         data = json.load(f)
         if len(data) > 0:
-            return data[str(0)]['Player_id']
+            return [data[str(0)]['Player_id'], data[str(0)]['From club id'], data[str(0)]['To club id']]
 
 
 if __name__ == "__main__":
-    last_id = get_last_id()
+    last_transfer = get_last_id()
     players = make_list()
     df = extract_data(players)
-    if len(df.index) == 0: # Doesn't write a new file if there is no new data
+    if len(df.index) == 0:  # Doesn't write a new file if there is no new data
         print("[ERROR] No new transfers")
-    else: 
+    else:
         export_data(df)
