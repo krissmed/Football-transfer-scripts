@@ -1,10 +1,10 @@
 # Imports
-from logging import exception
-import requests
-import pandas as pd
-from bs4 import BeautifulSoup
 import json
 import os
+
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
 
 
 def make_list():  # Returns a list of all players
@@ -40,9 +40,9 @@ def extract_data(players):  # Returns a dataframe with all transfer data
         new_data = extract(player)
         if new_data is False:  # If the player is already in the list, break the loop
             break
-        print(f"[Added player] {counter}/{len(players)}")
         counter += 1
         data.append(new_data)  # Adds new data to the complete list
+        print(f"[Added player] {counter}/{len(players)}")
 
     df = pd.DataFrame(data=data, columns=["Player_id", "Name", "Full Name", "Position", "Age", "Nationality", "Second Nationality",
                       "To club", "To club id", "Option", "Date signed", "New contract expiry date"])
@@ -50,7 +50,6 @@ def extract_data(players):  # Returns a dataframe with all transfer data
 
 
 def extract(player):  # Extracts data from the table
-    new_data = []
     # Extracting name
     name = player.find('img', {'class': 'bilderrahmen-fixed lazy lazy'})['alt']
 
@@ -99,21 +98,7 @@ def extract(player):  # Extracts data from the table
         player.find_all('td', {'class': 'hauptlink'})[
             0].find('a')['href'])  # Getting player details form player profile
 
-    # Adding data to list
-    new_data.append(player_id)
-    new_data.append(name)
-    new_data.append(full_name)
-    new_data.append(position)
-    new_data.append(age)
-    new_data.append(firNat)
-    new_data.append(secNat)
-    new_data.append(new_club)
-    new_data.append(new_club_id)
-    new_data.append(option)
-    new_data.append(new_contract_signed)
-    new_data.append(new_contract_length)
-
-    return new_data
+    return [player_id, name, full_name, position, age, firNat, secNat, new_club, new_club_id, option, new_contract_signed, new_contract_length]
 
 
 # Gets the player details from the player profile
@@ -157,7 +142,7 @@ def export_data(df):  # Export to json or csv
 
   # Checks whether the player is already listed
 
-
+# Checks if the player last output matchest current player ouput
 def check_last_extension(player_id, new_club_id, new_contract_signed, new_contract_length):
     if [player_id, new_club_id, new_contract_signed, new_contract_length] == last_output:
         return False
@@ -171,9 +156,11 @@ def get_last_id():
         data = json.load(f)
         if len(data) > 0:
             return [data['0']['Player_id'], data['0']['To club id'], data['0']['Date signed'], data['0']['New contract expiry date']]
+        else:
+            return False
+    else:
+        return False
 
-
-last_transfer = False
 
 if __name__ == "__main__":
     last_output = get_last_id()
