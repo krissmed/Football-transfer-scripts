@@ -47,6 +47,7 @@ def extract_data(players):  # Returns a dataframe of all players
                                           "Second Nationality",
                       "From club", "From club id", "To club", "To club id", "Tranfer date", "Fee", "Date joined",
                                           "Contract expiry date"])
+    print(data)
     return df
 
 
@@ -56,6 +57,9 @@ def extract(player):  # Extracts data from a player
 
     # Adding transfermarkt id to the table
     player_id = player.find('a', {'title': name})['href'].split('/')[4]
+
+    fm_player_id = get_fm_id(tfm_player_id, 'player')
+
 
     # Adding position to table
     position = player.find_all('td', {'class': ''})[2].text
@@ -77,10 +81,12 @@ def extract(player):  # Extracts data from a player
 
     # Adding club from id
     if club_from == "Retired" or club_from == "Career break":
-        club_from_id = "Null"
+        club_from_tfm_id = "Null"
     else:
-        club_from_id = player.find('a', {'title': club_from})[
+        club_from_tfm_id = player.find('a', {'title': club_from})[
             'href'].split('/')[4]
+
+    # club_from_fm_id = get_fm_id(club_from_tfm_id, 'team')
 
     # Adding transfer club to
     club_to = player.find_all('img', {'class': 'tiny_wappen'})[1]['alt']
@@ -88,9 +94,12 @@ def extract(player):  # Extracts data from a player
     # Adding club_to id
 
     if club_to == "Retired" or club_to == "Career break":
-        club_to_id = "Null"
+        club_to_tfm_id = "Null"
     else:
-        club_to_id = player.find('a', {'title': club_to})['href'].split('/')[4]
+        club_to_tfm_id = player.find('a', {'title': club_to})['href'].split('/')[4]
+
+    # club_to_fm_id = get_fm_id(club_to_tfm_id, 'team')
+
 
     # Adding transfer date
     transfer_date = player.find_all('td', {'class': 'zentriert'})[2].text
@@ -100,14 +109,27 @@ def extract(player):  # Extracts data from a player
 
     if last_transfer is not False:
         # Checks if the player is already in the list
-        if not check_last_transfer(player_id, club_from_id, club_to_id):
+        if not check_last_transfer(player_id, club_from_tfm_id, club_to_tfm_id):
             return False  # If the player is already in the list, return false¨
 
     date_joined, contract_length, full_name = getting_player_details(
         player, name)  # Getting player details form player profile
 
-    return [player_id, name, full_name, position, age, fir_nat, sec_nat, club_from, club_from_id,
-            club_to, club_to_id, transfer_date, transfer_type, date_joined.strip(), contract_length.strip()]
+    return [player_id, name, full_name, position, age, fir_nat, sec_nat, club_from, club_from_tfm_id,
+            club_to, club_to_tfm_id, transfer_date, transfer_type, date_joined.strip(), contract_length.strip()]
+
+def get_fm_id(id, file):
+    df = pd.read_csv(f"../Repo/{file}.csv")
+    tfm_id = df['Transfermarkt_id'].tolist()
+    print(tfm_id)
+    fm_id = df['Football_Manager_id'].tolist()
+    print(fm_id)
+    for i in range(len(tfm_id)):
+        if id == tfm_id[i]:
+            print(f'{id} == {tfm_id[i]}')
+            return fm_id[i]
+
+    return False
 
 
 def getting_player_details(player, name):
@@ -171,6 +193,7 @@ def check_last_transfer(player_id, clubFrom_id, clubTo_id):
         return True
 
 def internal_transfer(player):
+    # If team id are connected in tfm_team_ids.csv --> Do not output
     # Check for internal transfer Man U U23 --> Man U Reserves
     pass
 

@@ -44,7 +44,7 @@ def extract_data(players):  # Returns a dataframe with all transfer data
         data.append(new_data)  # Adds new data to the complete list
         print(f"[Added player] {counter}/{len(players)}")
 
-    df = pd.DataFrame(data=data, columns=["Player_id", "Name", "Full Name", "Position", "Age", "Nationality", "Second Nationality",
+    df = pd.DataFrame(data=data, columns=["TFM_player_id", "FM_player_id", "Name", "Full Name", "Position", "Age", "Nationality", "Second Nationality",
                       "To club", "To club id", "Option", "Date signed", "New contract expiry date"])
     return df
 
@@ -54,7 +54,10 @@ def extract(player):  # Extracts data from the table
     name = player.find('img', {'class': 'bilderrahmen-fixed lazy lazy'})['alt']
 
     # Extracting transfermarkt player id
-    player_id = player.find('a', {'title': name})['href'].split('/')[4]
+    tfm_player_id = player.find('a', {'title': name})['href'].split('/')[4]
+
+    # Adding FM player id
+    fm_player_id = get_fm_id(tfm_player_id, 'player')
 
     # Extracting position
     position = player.find_all('td', {'class': ''})[2].text
@@ -91,17 +94,32 @@ def extract(player):  # Extracts data from the table
 
     if last_output is not False:
         # Checks if the player is already in the list
-        if check_last_extension(player_id, new_club_id, new_contract_signed, new_contract_length) == False:
+        if check_last_extension(tfm_player_id, new_club_id, new_contract_signed, new_contract_length) == False:
             return False  # If the player is already in the list, return false
 
     full_name = getting_player_details(
         player.find_all('td', {'class': 'hauptlink'})[
             0].find('a')['href'])  # Getting player details form player profile
 
-    return [player_id, name, full_name, position, age, firNat, secNat, new_club, new_club_id, option, new_contract_signed, new_contract_length]
+    return [tfm_player_id, fm_player_id, name, full_name, position, age, firNat, secNat, new_club, new_club_id, option, new_contract_signed, new_contract_length]
 
+
+def get_fm_id(id, file):
+    df = pd.read_csv(f"../Repo/{file}.csv")
+    tfm_id = df['Transfermarkt_id'].tolist()
+    print(tfm_id)
+    fm_id = df['Football_Manager_id'].tolist()
+    print(fm_id)
+    for i in range(len(tfm_id)):
+        if id == tfm_id[i]:
+            print(f'{id} == {tfm_id[i]}')
+            return fm_id[i]
+
+    return False
 
 # Gets the player details from the player profile
+
+
 def getting_player_details(player_link):
     url = (
         f"https://www.transfermarkt.com{player_link}")
@@ -143,6 +161,8 @@ def export_data(df):  # Export to json or csv
   # Checks whether the player is already listed
 
 # Checks if the player last output matchest current player ouput
+
+
 def check_last_extension(player_id, new_club_id, new_contract_signed, new_contract_length):
     if [player_id, new_club_id, new_contract_signed, new_contract_length] == last_output:
         return False
@@ -155,7 +175,7 @@ def get_last_id():
         f = open('../Output/Contract_extensions.json')
         data = json.load(f)
         if len(data) > 0:
-            return [data['0']['Player_id'], data['0']['To club id'], data['0']['Date signed'], data['0']['New contract expiry date']]
+            return [data['0']['TFM_player_id'], data['0']['To club id'], data['0']['Date signed'], data['0']['New contract expiry date']]
         else:
             return False
     else:
