@@ -3,6 +3,7 @@
 import csv
 import os
 import requests
+import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup
 import re
@@ -40,63 +41,50 @@ def make_list():
 
 
 def match_ids(players):
-    data = []
+    tfm_id_return = []
+    fm_id_return = []
     for player in players:
-        new_line = []
         tfm_id = player.find(
             'a', {'class': 'small text-dark'})['href'].split("/")
         fm_id = player.find(
             'h5', {'class': 'flex-fill m-0'}).find('a')['href'].split("/")
 
-        new_line.append(tfm_id[tfm_id.index('profil')+2])
-        new_line.append(fm_id[-1])
-        data.append(new_line)
-    print(data)
-    return data
+        tfm_id_return.append(tfm_id[tfm_id.index('profil')+2])
+        fm_id_return.append(fm_id[-1])
+    return tfm_id_return, fm_id_return
 
 
-def merge_lists(list, csvfile):
-    data = []
+def merge_lists(tfm_id, fm_id, csvfile):
     df = pd.read_csv(f"../Repo/{str(csvfile)}.csv")
-    fm_id_current = df['Football Manager ID'].tolist()
-    tfm_id_current = df['Transfermarkt ID'].tolist()
+    data = []
+    for i in range(len(df['Football Manager ID'].tolist())):
+        new_line = []
+        new_line.append(df['Football Manager ID'][i])
+        new_line.append(df['Transfermarkt ID'].tolist()[i])
+        data.append(new_line)
+    for i in range(len(tfm_id)):
+        new_line = []
+        new_line.append(fm_id[i])
+        new_line.append(tfm_id[i])
+        data.append(new_line)
 
-    for i in range(len(list)):
-        if list[i][0] not in fm_id_current:
-            tfm_id_current.append(list[i][0])
-            fm_id_current.append(list[i][1])
-            print(f"[Entry added] {list[i]}")
-        else:
-            continue
-    for i in range(len(fm_id_current)):
-        new_entry = [fm_id_current, tfm_id_current]
-        data.append(new_entry)
-    return data
+    df = pd.DataFrame(data=data, columns=['Football Manager ID', 'Transfermarkt ID']).drop_duplicates()
+    return df
 
 
-def output_to_csv(data, file):
-    df = pd.DataFrame(data=data, columns=[
-                      "Football Manager ID", "Transfermarkt ID"])
-    df.drop_duplicates(subset='Football Manager ID')
-    df['Transfermarkt ID'] = df['Transfermarkt ID'].astype(str).astype(int)
-    df['Football Manager ID'] = df['Football Manager ID'].astype(str).astype(int)
-    print(df.dtypes)
+def output_to_csv(df, file):
+    df.to_csv(f'../Repo/{str(file)}.csv', index=False)
 
-    df = df.sort_values(by=['Football Manager ID'])
-    print(df)
-
-    df.to_csv(f'../Repo/{file}.csv', index=False)
-
-    df.to_json(f'../Repo/{file}.json', orient="index")
+    df.to_json(f'../Repo/{str(file)}.json', orient="index")
 
 
 if __name__ == "__main__":
     player_list, staff_list = make_list()
     if len(player_list) > 0:
-        players = match_ids(player_list)
-        data = merge_lists(players, 'Player')
-        output_to_csv(players, 'Player')
+        tfm_id, fm_id = match_ids(player_list)
+        data = merge_lists(tfm_id, fm_id, 'Player')
+        output_to_csv(data, 'Player')
     if len(staff_list) > 0:
-        staff = match_ids(staff_list)
-        data = merge_lists(staff, 'Staff')
-        output_to_csv(staff, 'Staff')
+        tfm_id, fm_id = match_ids(staff_list)
+        data = merge_lists(tfm_id, fm_id, 'Staff')
+        output_to_csv(data, 'Staff')
