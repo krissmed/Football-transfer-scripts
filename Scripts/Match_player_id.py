@@ -8,26 +8,6 @@ from bs4 import BeautifulSoup
 import re
 
 
-def remove_duplicates():
-    with open('../Repo/transfer_market_fm_ids.csv', 'r') as in_file, open('../Repo/ouput.csv', 'w') as out_file:
-
-        seen = set()  # set for fast O(1) amortized lookup
-
-        for line in in_file:
-            if line in seen:
-                continue  # skip duplicate
-
-            seen.add(line)
-            out_file.write(line)
-
-
-def check_for_duplicate(tfm_id, data):
-    for row in data:
-        if tfm_id == row[1]:
-            return True
-    return False
-
-
 def make_list():
     players = []
     staff = []
@@ -59,21 +39,6 @@ def make_list():
     return players, staff
 
 
-def extract(players):
-    for player in players:
-        pass
-
-
-def remove_broken(data):
-    with open('../Repo/transfer_market_fm_ids.csv') as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        for row in csv_reader:
-            if row[0] == "0":
-                print("Remove")
-            else:
-                data.append(row)
-
-
 def match_ids(players):
     data = []
     for player in players:
@@ -90,55 +55,34 @@ def match_ids(players):
     return data
 
 
-def export_data(df):  # Export to json or csv
-    try:
-        if not os.path.exists("../Index"):
-            os.mkdir("../Index")
-        df.to_csv('../Output/player_index.csv', index=False)
-    except Exception as e:
-        print(e)
-
-
-def open_playerindex():
-    df = pd.read_csv("../Repo/player.csv")
-    fm_id_current = df['Football_Manager_id'].tolist()
-    tfm_id_current = df['Transfermarkt_id'].tolist()
-    return fm_id_current, tfm_id_current
-
-
-def sort_complete_csv():
-    # After output, the csv should be sorted to make it easier to naivgate. Preferably by fm_id
-    pass
-
-
 def merge_lists(list, csvfile):
     data = []
-    df = pd.read_csv(f"../Repo/{csvfile}.csv")
-    fm_id_current = df['Football_Manager_id'].tolist()
-    tfm_id_current = df['Transfermarkt_id'].tolist()
+    df = pd.read_csv(f"../Repo/{str(csvfile)}.csv")
+    fm_id_current = df['Football Manager ID'].tolist()
+    tfm_id_current = df['Transfermarkt ID'].tolist()
 
     for i in range(len(list)):
-        if list[i][0] in fm_id_current:
+        if list[i][0] not in fm_id_current:
             tfm_id_current.append(list[i][0])
             fm_id_current.append(list[i][1])
             print(f"[Entry added] {list[i]}")
         else:
             continue
     for i in range(len(fm_id_current)):
-        new_entry = [tfm_id_current, fm_id_current]
+        new_entry = [fm_id_current, tfm_id_current]
         data.append(new_entry)
     return data
 
 
 def output_to_csv(data, file):
     df = pd.DataFrame(data=data, columns=[
-                      "Transfermarkt_id", "Football_Manager_id"])
-    df.drop_duplicates(subset='Football_Manager_id')
-    df['Transfermarkt_id'] = df['Transfermarkt_id'].astype(str).astype(int)
-    df['Football_Manager_id'] = df['Football_Manager_id'].astype(str).astype(int)
+                      "Football Manager ID", "Transfermarkt ID"])
+    df.drop_duplicates(subset='Football Manager ID')
+    df['Transfermarkt ID'] = df['Transfermarkt ID'].astype(str).astype(int)
+    df['Football Manager ID'] = df['Football Manager ID'].astype(str).astype(int)
     print(df.dtypes)
 
-    df = df.sort_values(by=['Football_Manager_id'])
+    df = df.sort_values(by=['Football Manager ID'])
     print(df)
 
     df.to_csv(f'../Repo/{file}.csv', index=False)
