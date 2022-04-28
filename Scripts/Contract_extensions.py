@@ -118,8 +118,6 @@ def get_fm_id(id, file):
     return False
 
 # Gets the player details from the player profile
-
-
 def getting_player_details(player_link):
     url = (
         f"https://www.transfermarkt.com{player_link}")

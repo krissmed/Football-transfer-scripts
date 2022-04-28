@@ -120,8 +120,8 @@ def extract(player):  # Extracts data from a player
 
 def get_fm_id(id, file):
     df = pd.read_csv(f"../Repo/{file}.csv")
-    tfm_id = df['Transfermarkt_id'].tolist()
-    fm_id = df['Football_Manager_id'].tolist()
+    tfm_id = df['Transfermarkt ID'].tolist()
+    fm_id = df['Football Manager ID'].tolist()
     for i in range(len(tfm_id)):
         if id == tfm_id[i]:
             return fm_id[i]
