@@ -43,7 +43,7 @@ def extract_data(players):  # Returns a dataframe of all players
         counter += 1
         data.append(new_data)
 
-    df = pd.DataFrame(data=data, columns=["Player_id", "Name", "Full Name", "Position", "Age", "Nationality",
+    df = pd.DataFrame(data=data, columns=["Player_id", "Fm_id", "Name", "Full Name", "Position", "Age", "Nationality",
                                           "Second Nationality",
                       "From club", "From club id", "To club", "To club id", "Tranfer date", "Fee", "Date joined",
                                           "Contract expiry date"])
@@ -56,7 +56,7 @@ def extract(player):  # Extracts data from a player
     name = player.find('img', {'class': 'bilderrahmen-fixed lazy lazy'})['alt']
 
     # Adding transfermarkt id to the table
-    player_id = player.find('a', {'title': name})['href'].split('/')[4]
+    tfm_player_id = player.find('a', {'title': name})['href'].split('/')[4]
 
     fm_player_id = get_fm_id(tfm_player_id, 'player')
 
@@ -109,24 +109,21 @@ def extract(player):  # Extracts data from a player
 
     if last_transfer is not False:
         # Checks if the player is already in the list
-        if not check_last_transfer(player_id, club_from_tfm_id, club_to_tfm_id):
+        if not check_last_transfer(tfm_player_id, club_from_tfm_id, club_to_tfm_id):
             return False  # If the player is already in the list, return false¨
 
     date_joined, contract_length, full_name = getting_player_details(
         player, name)  # Getting player details form player profile
 
-    return [player_id, name, full_name, position, age, fir_nat, sec_nat, club_from, club_from_tfm_id,
+    return [tfm_player_id, fm_player_id, name, full_name, position, age, fir_nat, sec_nat, club_from, club_from_tfm_id,
             club_to, club_to_tfm_id, transfer_date, transfer_type, date_joined.strip(), contract_length.strip()]
 
 def get_fm_id(id, file):
     df = pd.read_csv(f"../Repo/{file}.csv")
     tfm_id = df['Transfermarkt_id'].tolist()
-    print(tfm_id)
     fm_id = df['Football_Manager_id'].tolist()
-    print(fm_id)
     for i in range(len(tfm_id)):
         if id == tfm_id[i]:
-            print(f'{id} == {tfm_id[i]}')
             return fm_id[i]
 
     return False
@@ -141,37 +138,21 @@ def getting_player_details(player, name):
                                 'User-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}).text
     # Parse the html content
     soup = BeautifulSoup(html_content, "lxml")
-    player_data_list = soup.find_all('span', {
-                                     'class': 'info-table__content info-table__content--bold'})  # Finds all player data
-    # Finds all player data index
-    player_data_index = soup.find_all('span', {
-                                      'class': 'info-table__content info-table__content--regular'})
-    counter = 0  # Starts tbe counter at 0
+    player_data = soup.find('div', {
+                                     'class': 'info-table info-table--right-space'}).find_all('span')  # Finds all player data
 
-    for i in player_data_index:
+    counter = 0  # Reset the counter to 0
+    full_name = "Null"
+    date_joined = "Null"
+    contract_length = "Null"
+
+    for i in player_data:
         if i.text == "Name in home country:":
-            full_name = player_data_list[counter].text
-            break
-        else:
-            full_name = "Null"
-        counter += 1
-
-    counter = 0  # Reset the counter to 0
-
-    for i in player_data_index:  # Finds the joined date
-        if i.text == "Joined:":  # If the index is "Joined:"
-            # The date joined is the next "Joined:"
-            date_joined = player_data_list[counter].text
-            break  # Stop looking for the joined date
-        counter += 1
-
-    counter = 0  # Reset the counter to 0
-
-    for i in player_data_index:  # Finds the contract expiry date
-        if i.text == "Contract expires:":
-            # The contract length is the next "Contract expires:"
-            contract_length = player_data_list[counter].text
-            break  # Stop looking for the contract length
+            full_name = player_data[counter+1].text
+        elif i.text == "Joined:":
+            date_joined = player_data[counter+1].text
+        elif i.text == "Contract expires:":
+            contract_length = player_data[counter+1].text
         counter += 1
 
     return date_joined, contract_length, full_name
