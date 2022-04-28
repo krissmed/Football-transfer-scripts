@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 
 # Output files
-.csv
-.json
+Output/
+.idea
