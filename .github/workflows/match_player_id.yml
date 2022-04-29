@@ -22,7 +22,7 @@ jobs:
         run: ls
 
       - name: execute py script
-        run: cd /Script && python3 ./Match_player_id.py
+        run: cd /Scripts && python3 ./Match_player_id.py
 
       - name: commit files
         run: |
