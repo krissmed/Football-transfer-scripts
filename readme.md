@@ -14,6 +14,5 @@ python Latest_transfers.py
 Once output is generated, the data is stored in a csv file and a json file under the output folder. 
 
 ## Roadmap
-TO DO:
 - [ ] Match Transfermarkt team ids and Football Manager team ids
 - [ ] Sort dataframes before output
