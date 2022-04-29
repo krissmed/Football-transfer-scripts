@@ -2,5 +2,4 @@ beautifulsoup4==4.11.1
 pandas==1.3.5
 requests==2.27.0
 lxml==4.8.0
-os
 re==2.2.2
