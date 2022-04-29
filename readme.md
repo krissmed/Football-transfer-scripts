@@ -1,4 +1,5 @@
 # Transfermarkt-scripts
+[![match_player_id](https://github.com/krissmed/Transfermarkt-scripts/actions/workflows/Update%20FM%20ids.yml/badge.svg)](https://github.com/krissmed/Transfermarkt-scripts/actions/workflows/Update%20FM%20ids.yml)<br>
 A collection of scripts used to scrape last transfers and last contract extensions on transfermarkt.com
 ## Usage
 ### Prerequisites
