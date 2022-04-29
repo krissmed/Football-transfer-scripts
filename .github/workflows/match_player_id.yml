@@ -1,8 +1,8 @@
-Name: Match_player_id
+name: match_player_id
 
 on:
   schedule:
-    cron: "48 * * * *"
+    - cron: '54 * * * *'
 
 jobs:
   build:
