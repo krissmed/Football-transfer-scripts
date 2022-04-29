@@ -1,0 +1,32 @@
+Name: Match_player_id
+
+on:
+  schedule:
+    cron: "41 * * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Match player id
+        uses: actions/checkout@v2
+
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.7"
+
+      - name: execute py script
+        run: python3 ../../Scripts/match_player_id.py
+
+      - name: commit files
+        run: |
+          git add .
+          git commit -m "Update player id"
+          git push origin master
+      - name: push to github
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+          branch: dev
