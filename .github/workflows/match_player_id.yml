@@ -32,8 +32,3 @@ jobs:
           git add .
           git commit -m "Update player id"
           git push origin main
-      - name: push to github
-        uses: ad-m/github-push-action@v0.6.0
-        with:
-          token: ${{secrets.GITHUB_TOKEN}}
-          branch: dev
