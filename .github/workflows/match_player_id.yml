@@ -2,7 +2,7 @@ Name: Match_player_id
 
 on:
   schedule:
-    cron: "41 * * * *"
+    cron: "48 * * * *"
 
 jobs:
   build:
