@@ -16,7 +16,7 @@ jobs:
           python-version: "3.7"
 
       - name: execute py script
-        run: python3 ../../Scripts/Match_player_id.py
+        run: python3 ./Scripts/Match_player_id.py
 
       - name: commit files
         run: |
