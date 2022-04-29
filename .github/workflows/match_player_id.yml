@@ -1,6 +1,8 @@
 name: match_player_id
 
-on: workflow_dispatch
+on:
+  schedule:
+    - cron: '0 0 * * *'
 
 jobs:
   build:
