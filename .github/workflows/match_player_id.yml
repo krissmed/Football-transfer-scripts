@@ -16,7 +16,7 @@ jobs:
           python-version: "3.7"
 
       - name: Install dependencies
-        run: pip3 install requests re lxml os beautifulsoup4 pandas
+        run: pip3 install requests lxml os beautifulsoup4 pandas
 
       - name: execute py script
         run: python3 ./Scripts/Match_player_id.py
