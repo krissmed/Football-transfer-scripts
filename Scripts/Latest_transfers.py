@@ -58,7 +58,7 @@ def extract(player):  # Extracts data from a player
     # Adding transfermarkt id to the table
     tfm_player_id = player.find('a', {'title': name})['href'].split('/')[4]
 
-    fm_player_id = get_fm_id(tfm_player_id, 'player')
+    fm_player_id = get_fm_id(tfm_player_id, 'Player')
 
 
     # Adding position to table

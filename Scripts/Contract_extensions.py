@@ -57,7 +57,7 @@ def extract(player):  # Extracts data from the table
     tfm_player_id = player.find('a', {'title': name})['href'].split('/')[4]
 
     # Adding FM player id
-    fm_player_id = get_fm_id(tfm_player_id, 'player')
+    fm_player_id = get_fm_id(tfm_player_id, 'Player')
 
     # Extracting position
     position = player.find_all('td', {'class': ''})[2].text
@@ -106,10 +106,8 @@ def extract(player):  # Extracts data from the table
 
 def get_fm_id(id, file):
     df = pd.read_csv(f"../Repo/{file}.csv")
-    tfm_id = df['Transfermarkt_id'].tolist()
-    print(tfm_id)
-    fm_id = df['Football_Manager_id'].tolist()
-    print(fm_id)
+    tfm_id = df['Transfermarkt ID'].tolist()
+    fm_id = df['Football Manager ID'].tolist()
     for i in range(len(tfm_id)):
         if id == tfm_id[i]:
             print(f'{id} == {tfm_id[i]}')
