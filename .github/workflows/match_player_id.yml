@@ -19,7 +19,7 @@ jobs:
         run: pip3 install requests lxml beautifulsoup4 pandas
 
       - name: execute py script
-        run: cd ./Script && python3 ./Match_player_id.py
+        run: cd /Script && python3 ./Match_player_id.py
 
       - name: commit files
         run: |
