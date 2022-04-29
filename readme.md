@@ -17,5 +17,4 @@ Once output is generated, the data is stored in a csv file and a json file under
 TO DO:
 - [ ] Match Transfermarkt team ids and Football Manager team ids
 
-## Contributing
-Feel free to add your own scripts to this repository via a pull request.
+## Contributions are welcome!
