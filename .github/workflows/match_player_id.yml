@@ -26,6 +26,9 @@ jobs:
 
       - name: commit files
         run: |
+          git init
+          git config user.name "krissmed"
+          git config user.email "krissmed@hotmail.com"
           git add .
           git commit -m "Update player id"
           git push origin master
