@@ -1,8 +1,6 @@
 name: Verify contract extension script
 
-on: 
-  schedule:
-    - cron: '36 2 * * *'
+on: workflow_dispatch 
 
 
 jobs:
