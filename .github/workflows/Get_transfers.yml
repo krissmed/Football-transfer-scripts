@@ -1,6 +1,8 @@
 name: Verify transfers script
 
-on: workflow_dispatch 
+on:  
+  schedule:
+    - cron: '36 3 * * *'
 
 
 jobs:
