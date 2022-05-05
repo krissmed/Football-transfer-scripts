@@ -1,0 +1,25 @@
+name: Verify transfers script
+
+on: 
+  schedule:
+    - cron: '36 2 * * *'
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Verify transfers
+        uses: actions/checkout@v2
+
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.7"
+
+      - name: Install dependencies
+        run: pip3 install requests lxml beautifulsoup4 pandas
+
+      - name: execute py script
+        run: cd ./Scripts && python3 ./Latest_transfers.py

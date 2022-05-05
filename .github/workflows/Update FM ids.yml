@@ -1,4 +1,4 @@
-name: match_player_id
+name: Update FM ids
 
 on: 
   schedule:
