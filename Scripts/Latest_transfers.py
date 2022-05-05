@@ -138,8 +138,7 @@ def getting_player_details(player, name):
                                 'User-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}).text
     # Parse the html content
     soup = BeautifulSoup(html_content, "lxml")
-    player_data = soup.find('div', {
-                                     'class': 'info-table info-table--right-space'}).find_all('span')  # Finds all player data
+    player_data = soup.find('div', {'class': ['info-table info-table--right-space', 'info-table info-table--right-space min-height-audio']}).find_all('span')  # Finds all player data
 
     counter = 0  # Reset the counter to 0
     full_name = "Null"
