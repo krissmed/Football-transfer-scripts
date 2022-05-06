@@ -130,15 +130,13 @@ def getting_player_details(player_link):
     player_data_index = soup.find_all('span', {
                                       'class': 'info-table__content info-table__content--regular'})  # Finds all player data index
 
-    counter = 0  # Starts tbe counter at 0
-
+    counter = 0  # Starts the counter at 0
+    full_name = "Null"
     # Loops through all player details
     for i in player_data_index:
         if i.text == "Name in home country:":  # Checks if the player has a full name listed
             full_name = player_data_list[counter].text
             break
-        else:
-            full_name = "Null"
         counter += 1
 
     return full_name
