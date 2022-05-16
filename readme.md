@@ -20,7 +20,6 @@ Once output is generated, the data is stored in a csv file and a json file under
 
 ## Roadmap
 - [ ] Match Transfermarkt team ids and Football Manager team ids
-- [ ] Add loan return date to output (for latest_transfers)
 - [ ] Add future transfer script
 - [ ] Add managerial changes script
 - [ ] Add background extractor from transfermarkt
