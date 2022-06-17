@@ -43,7 +43,7 @@ def extract_data(players):  # Returns a dataframe of all players
         counter += 1
         data.append(new_data)
 
-    df = pd.DataFrame(data=data, columns=["Player_id", "Fm_id", "Name", "Full Name", "Position", "Age", "Nationality",
+    df = pd.DataFrame(data=data, columns=["Player_id", "Name", "Full Name", "Position", "Age", "Nationality",
                                           "Second Nationality",
                       "From club", "From club id", "To club", "To club id", "Tranfer date", "Fee", "Date joined",
                                           "Contract expiry date"])
@@ -57,9 +57,6 @@ def extract(player):  # Extracts data from a player
 
     # Adding transfermarkt id to the table
     tfm_player_id = player.find('a', {'title': name})['href'].split('/')[4]
-
-    fm_player_id = get_fm_id(tfm_player_id, 'Player')
-
 
     # Adding position to table
     position = player.find_all('td', {'class': ''})[2].text
@@ -115,18 +112,8 @@ def extract(player):  # Extracts data from a player
     date_joined, contract_length, full_name = getting_player_details(
         player, name)  # Getting player details form player profile
 
-    return [tfm_player_id, fm_player_id, name, full_name, position, age, fir_nat, sec_nat, club_from, club_from_tfm_id,
+    return [tfm_player_id, name, full_name, position, age, fir_nat, sec_nat, club_from, club_from_tfm_id,
             club_to, club_to_tfm_id, transfer_date, transfer_type, date_joined.strip(), contract_length.strip()]
-
-def get_fm_id(id, file):
-    df = pd.read_csv(f"../Repo/{file}.csv")
-    tfm_id = df['Transfermarkt ID'].tolist()
-    fm_id = df['Football Manager ID'].tolist()
-    for i in range(len(tfm_id)):
-        if id == tfm_id[i]:
-            return fm_id[i]
-
-    return False
 
 
 def getting_player_details(player, name):
@@ -164,6 +151,10 @@ def export_data(df):  # Export to json or csv
 
     df.to_json('../Output/Latest_transfers.json', orient="index")
 
+def send_to_susie():
+    # Post to the susie server
+    pass
+
 
 # Removes players that are already in the list
 def check_last_transfer(player_id, clubFrom_id, clubTo_id):
@@ -171,11 +162,6 @@ def check_last_transfer(player_id, clubFrom_id, clubTo_id):
         return False
     else:
         return True
-
-def internal_transfer(player):
-    # If team id are connected in tfm_team_ids.csv --> Do not output
-    # Check for internal transfer Man U U23 --> Man U Reserves
-    pass
 
 
 def get_last_id():

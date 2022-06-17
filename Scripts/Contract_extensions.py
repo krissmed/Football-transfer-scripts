@@ -110,7 +110,6 @@ def get_fm_id(id, file):
     fm_id = df['Football Manager ID'].tolist()
     for i in range(len(tfm_id)):
         if id == tfm_id[i]:
-            print(f'{id} == {tfm_id[i]}')
             return fm_id[i]
 
     return False
