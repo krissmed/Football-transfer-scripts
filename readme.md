@@ -22,5 +22,7 @@ Once output is generated, the data is stored in a csv file and a json file under
 ## Roadmap
 - [ ] Match Transfermarkt team ids and Football Manager team ids
 - [ ] Add future transfer script
-- [ ] Add managerial changes script
-- [ ] Add background extractor from transfermarkt
+- [ ] Add staff changes script
+- [ ] Add background extractor from transfermarkt (Links only)
+- [ ] Refactor to pull from each league individually
+- [ ] Refactor to stop pulling list when transfer is already listed
