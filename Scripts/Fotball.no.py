@@ -49,7 +49,6 @@ def extract(player):  # Extracts data from a player
     # Adding transfermarkt id to the table
     fotballno_id = player.find('a', {'class': 'tbl_prs_lnk'})['href'].split('/')[4].replace('?fiksId=', '')
 
-
     # Adding position to table
     position = "-"
     # Adding age to table
@@ -64,7 +63,6 @@ def extract(player):  # Extracts data from a player
         club_from_fotballno_id = player.findAll('a', {'class': 'tbl_prs_lnk'})[1]['href'].split('/')[4].replace('?fiksId=', '') # Fotball.no id of the club
         if "," in club_from:
             club_from = format_team_name(club_from)
-
     except:
         club_from = player.findAll('span', {'class': 'medium-text'})
         club_from_fotballno_id = "-"
@@ -94,10 +92,14 @@ def extract(player):  # Extracts data from a player
             return False  # If the player is already in the list, return false
 
     return fotballno_id, name, name, position, age, fir_nat, sec_nat, club_from, club_from_fotballno_id, club_to, club_to_fotballno_id, transfer_date, "-", transfer_date, "-", "-"
+
+
 def format_team_name(club):
     club_temp = club.split(",")
     new_club = f"{club_temp[1]} {club_temp[0]}"
     return new_club
+
+
 
 def export_data(df):  # Export to json or csv
     if not os.path.exists("../Output"):
@@ -120,7 +122,7 @@ def get_last_id():
         f = open('../Output/fotballno_transfers.json')
         data = json.load(f)
         if len(data) > 0:
-            return [data[str(0)]['Player_id'], data[str(0)]['From club id'], data[str(0)]['To club id']]
+            return [data[str(0)]['Fotballno_id'], data[str(0)]['From club id'], data[str(0)]['To club id']]
         else:
             return False
     else:
