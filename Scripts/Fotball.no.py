@@ -46,7 +46,6 @@ def extract_data(players):  # Returns a dataframe of all players
 def extract(player):  # Extracts data from a player
     # Adding name to table
     name = player.find('a', {'class': 'tbl_prs_lnk'}).text
-    print(name)
     # Adding transfermarkt id to the table
     fotballno_id = player.find('a', {'class': 'tbl_prs_lnk'})['href'].split('/')[4].replace('?fiksId=', '')
 
@@ -131,7 +130,6 @@ def get_last_id():
 if __name__ == "__main__":
     last_transfer = get_last_id()
     players = make_list()
-    print(players)
     df = extract_data(players)
     if len(df.index) == 0:  # Doesn't write a new file if there is no new data
         print("[ERROR] No new transfers")
