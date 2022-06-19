@@ -97,7 +97,6 @@ def extract(player):  # Extracts data from a player
 
     # club_to_fm_id = get_fm_id(club_to_tfm_id, 'team')
 
-
     # Adding transfer date
     transfer_date = player.find_all('td', {'class': 'zentriert'})[2].text
 
@@ -150,6 +149,7 @@ def export_data(df):  # Export to json or csv
     df.to_csv('../Output/Latest_transfers.csv', index=False)
 
     df.to_json('../Output/Latest_transfers.json', orient="index")
+
 
 def send_to_susie():
     # Post to the susie server

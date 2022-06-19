@@ -100,7 +100,6 @@ def format_team_name(club):
     return new_club
 
 
-
 def export_data(df):  # Export to json or csv
     if not os.path.exists("../Output"):
         os.mkdir("../Output")

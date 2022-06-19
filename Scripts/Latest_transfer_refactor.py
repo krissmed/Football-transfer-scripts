@@ -11,47 +11,53 @@ def get_comp_urls():
     urls = []  # Initialize list for urls
     i = 1  # Counter for page number
     for url in comp_urls:
-        while True:
-        html_content = requests.get(url + f'&page={i}', headers={
-            'User-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 '
-                          '(KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}).text
-        soup = BeautifulSoup(html_content, "lxml")
-        urls.append(extract_transfer_urls(url, i))
-        i += 1
-    print(len(urls))
+        i = 1  # Counter for page number
+        print(url)
+        active = True
+        while active:
+            html_content = requests.get(url + f'&page={i}', headers={
+                'User-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 '
+                              '(KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}).text
+            soup = BeautifulSoup(html_content, "lxml")
+            urls_on_page = []
+            remaining_rows, active = check_url(soup)
+            print(active)
+            print(i)
+            if active is False:
+                print(f"Length of remaining rows: {len(remaining_rows)}")
+                # for row in remaining_rows:
+                #     print(len(row))
+                #     link = f"https://www.transfermarkt.com{row.href}"
+                #     link = link.replace("startseite", "letztetransfers")
+                #     urls_on_page.append(link)
+
+            for player in soup.find_all('tr', {'class': 'odd'}):  # Extract all competitions with class odd
+                link = f"https://www.transfermarkt.com{player.find_all('a')[1]['href']}"
+                link = link.replace("startseite", "letztetransfers")
+                urls_on_page.append(link)
+
+            counter = (i * 25) + 1  # Output the list as it is on the website
+
+            for player in soup.find_all('tr', {'class': 'even'}):  # Extract all competitions with class even
+                link = f"https://www.transfermarkt.com{player.find_all('a')[1]['href']}"
+                link = link.replace("startseite", "letztetransfers")
+                # If cup/playoff --> Stop
+
+                urls_on_page.append(link)
+                counter += 2  # Calculate the next insertion point
+            urls.append(urls_on_page)
+
+            i += 1
 
 
-def extract_transfer_urls(url, i):
-    urls_on_page = []
 
-    print(soup.find('td', {'class': 'extrarow bg_blau_20 hauptlink'}))
-    if len(soup.find_all('tr', {'class': 'odd'})) == 0:
-        print("No transfers on this page")
-        return False
-    elif len(soup.find_all('td', {'class': 'extrarow bg_blau_20 hauptlink'})) > 1:
-        row_counter = 0
-        for heading in soup.find('table', {'class': 'items'}).find('tbody').find_all('tr',{'class'}):
-            row_counter += 1
-            if heading.text == "Domestic Cup":
-                break
-    elif soup.find('td', {'class': 'extrarow bg_blau_20 hauptlink'}).text == "Domestic Cup":
-        print("No transfers on this page")
-        return False
-    for player in soup.find_all('tr', {'class': 'odd'}):  # Extract all competitions with class odd
-        link = f"https://www.transfermarkt.com{player.find_all('a')[1]['href']}"
-        link = link.replace("startseite", "letztetransfers")
-        urls_on_page.append(link)
-
-    counter = (i * 25) + 1  # Output the list as it is on the website
-
-    for player in soup.find_all('tr', {'class': 'even'}):  # Extract all competitions with class even
-        link = f"https://www.transfermarkt.com{player.find_all('a')[1]['href']}"
-        link = link.replace("startseite", "letztetransfers")
-        # If cup/playoff --> Stop
-
-        urls_on_page.append(link)
-        counter += 2  # Calculate the next insertion point
-    print(urls_on_page)
+def check_url(soup):
+    for row in soup.find_all('td', {'class': 'extrarow bg_blau_20 hauptlink'}):
+        if row.text == "Domestic Cup":
+            remaining_rows = row.find_all_previous('tr', {'class': 'odd'})
+            remaining_rows.append(row.find_all_previous('tr', {'class': 'even'}))
+            return remaining_rows, False
+    return [], True
 
 
 

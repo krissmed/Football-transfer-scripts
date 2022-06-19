@@ -40,9 +40,9 @@ def extract_data(players):  # Returns a dataframe with all transfer data
         new_data = extract(player)
         if new_data is False:  # If the player is already in the list, break the loop
             break
-        counter += 1
         data.append(new_data)  # Adds new data to the complete list
         print(f"[Added player] {counter}/{len(players)}")
+        counter += 1
 
     df = pd.DataFrame(data=data, columns=["TFM_player_id", "FM_player_id", "Name", "Full Name", "Position", "Age", "Nationality", "Second Nationality",
                       "To club", "To club id", "Option", "Date signed", "New contract expiry date"])
