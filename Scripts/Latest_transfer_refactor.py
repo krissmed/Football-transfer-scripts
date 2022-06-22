@@ -176,12 +176,15 @@ def getting_player_details(player, name):
 
 
 def compare_last_transfer(url, player_id, club_from_id, club_to_id, transfer_date):
-    print(f"{last_transfer[0]}\n[{url}, {player_id}, {club_from_id}, {club_to_id}, {transfer_date}]")
-    if last_transfer[0] == [url, player_id, club_from_id, club_to_id, transfer_date]:
-        print("[ERROR]Transfer already listed")
-        print(last_transfer)
-        return False
-    return True
+    if last_transfer is not False:
+        print(f"{last_transfer[0]}\n[{url}, {player_id}, {club_from_id}, {club_to_id}, {transfer_date}]")
+        if last_transfer[0] == [url, player_id, club_from_id, club_to_id, transfer_date]:
+            print("[ERROR]Transfer already listed")
+            print(last_transfer)
+            return False
+        return True
+    else:
+        return True
 
 
 def get_last_transfer():
