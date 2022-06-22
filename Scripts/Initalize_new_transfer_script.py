@@ -197,7 +197,7 @@ def export_data(df):  # Export to json or csv
         os.mkdir("../Output")
     df.to_csv('../Output/Latest_transfersa.csv', index=False)
 
-    df.to_json('../Output/Latest_transfersa.json', orient="index")
+    df.to_json('../Output/Latest_transfersa.json', orient="records")
 
 
 
