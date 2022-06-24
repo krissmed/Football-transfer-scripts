@@ -209,6 +209,11 @@ def export_data(df):  # Export to json or csv
     df.to_json('../Output/Latest_transfersa.json', orient="records")
 
 
+def debug(string):
+
+    return f"[DEBUG] {string}"
+
+
 if __name__ == "__main__":
     global last_transfer
     last_transfer = get_last_transfer()
@@ -219,3 +224,7 @@ if __name__ == "__main__":
                                "Second Nationality", "From club", "From club id", "To club", "To club id",
                                "Tranfer date", "Fee", "Date joined", "Contract expiry date"])
     export_data(df)
+
+# todo
+# - Add support for bans
+# -
