@@ -76,41 +76,18 @@ def make_list_of_players(comp_urls):
     for url in comp_urls:
         print(f"[PROCESSING] Building list of all transferred players {counter}/{len(comp_urls)}")
         soup = create_bs4_object(url)
-        has_run = False
-        i = 0
-        if check_if_transfer(soup) is False:
+        if check_if_transfer(soup) is False or soup.find('tr', {'class': 'odd'}) is None:
             continue
         print(f"[Processing] Running on url: {url}")
-        for player_odd, player_even in zip(soup.find_all('tr', {'class': 'odd'}), soup.find_all('tr', {'class': 'even'})):
-            print(player_odd.find('img', {'class': 'bilderrahmen-fixed'})['alt'])
-            if has_run is False:
-                new_first_transfer = extract(player_odd, url)
-                new_first_transfer.insert(0, url)
-                first_transfers.append(new_first_transfer)
-                has_run = True
-                print(new_first_transfer)
-            # player_extract = extract(player_odd, url)
-            # print(player_extract)
-            # if not player_extract:
-            #     print("[Player_extract] Breaking")
-            #     break
-            # player_list.append(player_extract)
-            # print(f"[PROCESSING] Added player to list (Total: {len(player_list)})")
-            # print(player_even.find('img', {'class': 'bilderrahmen-fixed'})['alt'])
-            # player_extract = extract(player_even, url)
-            # if not player_extract:
-            #     print("[Player_extract] Breaking")
-            #     break
-            # player_list.append(player_extract)
-            # print(f"[PROCESSING] Added player to list (Total: {len(player_list)})")
-            i += 1
+        new_first_transfer = extract(soup.find('tr', {'class': 'odd'}), url)
+        new_first_transfer.insert(0, url)
+        first_transfers.append(new_first_transfer)
         counter += 1
     print(f'[PROCESSING] Found {len(player_list)} players')
     return first_transfers, player_list
 
 
 def extract(player, url):
-
     name = player.find('img', {'class': 'bilderrahmen-fixed'})['alt']
 
     tfm_player_id = player.find('a', {'title': name})['href'].split('/')[4]
@@ -131,10 +108,6 @@ def extract(player, url):
             'href'].split('/')[4]
 
     transfer_date = player.find_all('td', {'class': 'zentriert'})[2].text
-
-    if not compare_last_transfer(url, tfm_player_id, club_from_tfm_id, club_to_tfm_id, transfer_date):
-        print("[ERROR]Transfer already listed")
-        return False
 
     age = player.find_all('td', {'class': 'zentriert'})[1].text
 
@@ -178,32 +151,7 @@ def getting_player_details(player, name):
     return position.strip(), date_joined.strip(), contract_length, full_name
 
 
-def compare_last_transfer(url, player_id, club_from_id, club_to_id, transfer_date):
-    if last_transfer is not False:
-        for i in range(len(last_transfer)):
-            if last_transfer[i] == [url, player_id, club_from_id, club_to_id, transfer_date]:
-                print("[ERROR]Transfer already listed")
-                print(last_transfer)
-                last_transfer.pop(i)
-                return False
-    return True
-
-
-def get_last_transfer():
-    if os.path.isfile('../Output/Latest_transfersa.json'):  # Checks if the file exists
-        f = open('../Output/Latest_transfersa.json')
-        data = json.load(f)
-        last_transfers = []
-        for item in range(len(data)):
-            last_transfers.append([data[str(item)]['Url'], data[str(item)]['Player_id'], data[str(item)]['From club id'], data[str(item)]['To club id'], data[str(item)]['Tranfer date']])
-            print(len(last_transfers))
-        return last_transfers
-    else:
-        return False
-
-
 def export_data(df):  # Export to json or csv
-    print(12342)
     if not os.path.exists("../Output"):
         os.mkdir("../Output")
     df.to_csv('../Output/latest_transfers.csv', index=False)
@@ -212,8 +160,6 @@ def export_data(df):  # Export to json or csv
 
 
 if __name__ == "__main__":
-    global last_transfer
-    last_transfer = get_last_transfer()
     comp_urls = get_competition_urls()
     first_transfer, player_list = make_list_of_players(comp_urls)
     print(first_transfer)
@@ -222,3 +168,6 @@ if __name__ == "__main__":
                                "Second Nationality", "From club", "From club id", "To club", "To club id",
                                "Tranfer date", "Fee", "Date joined", "Contract expiry date"])
     export_data(df)
+
+# Todo
+# Håndter edge-case hvor det ikke er noen transfers

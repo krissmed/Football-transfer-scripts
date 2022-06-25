@@ -1,9 +1,9 @@
-# Imports
 import json
 import os
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+
 
 def create_bs4_object(url):
     html_content = requests.get(url, headers={
@@ -79,30 +79,28 @@ def make_list_of_players(comp_urls):
         has_run = False
         i = 0
         check_if_transfer(soup)
+        if check_if_transfer(soup) is False or soup.find('tr', {'class': 'odd'}) is None:
+            continue
         print(f"[Processing] Running on url: {url}")
-        for player_odd, player_even in zip(soup.find_all('tr', {'class': 'odd'}), soup.find_all('tr', {'class': 'even'})):
-            print(player_odd.find('img', {'class': 'bilderrahmen-fixed'})['alt'])
+        for player_odd, player_even in zip(soup.find_all('tr', {'class': 'odd'}),
+                                           soup.find_all('tr', {'class': 'even'})):
             if has_run is False:
                 new_first_transfer = [url, extract(player_odd, url)]
-                first_transfers.append(new_first_transfer)
+                if new_first_transfer is not False:
+                    first_transfers.append(new_first_transfer)
                 has_run = True
             player_extract = extract(player_odd, url)
-            print(player_extract)
             if not player_extract:
-                print("[Player_extract] Breaking")
                 break
             player_list.append(player_extract)
             print(f"[PROCESSING] Added player to list (Total: {len(player_list)})")
-            print(player_even.find('img', {'class': 'bilderrahmen-fixed'})['alt'])
             player_extract = extract(player_even, url)
             if not player_extract:
-                print("[Player_extract] Breaking")
                 break
             player_list.append(player_extract)
             print(f"[PROCESSING] Added player to list (Total: {len(player_list)})")
             i += 1
         counter += 1
-        last_transfer.pop(0)
     print(f'[PROCESSING] Found {len(player_list)} players')
     return first_transfers, player_list
 
@@ -115,14 +113,14 @@ def extract(player, url):
 
     club_to = player.find_all('img', {'class': 'tiny_wappen'})[1]['alt']
 
-    if club_to == "Retired" or club_to == "Career break":
+    if club_to == "Retired" or club_to == "Career break" or club_to == "Ban":
         club_to_tfm_id = "Null"
     else:
         club_to_tfm_id = player.find('a', {'title': club_to})['href'].split('/')[4]
 
     club_from = player.find('img', {'class': 'tiny_wappen'})['alt']
 
-    if club_from == "Retired" or club_from == "Career break":
+    if club_from == "Retired" or club_from == "Career break" or club_to == "Ban":
         club_from_tfm_id = "Null"
     else:
         club_from_tfm_id = player.find('a', {'title': club_from})[
@@ -156,7 +154,7 @@ def getting_player_details(player, name):
     player_data = soup.find('div', {'class': ['info-table info-table--right-space',
                                               'info-table info-table--right-space min-height-audio']}).find_all('span')
 
-    counter = 0  # Reset the counter to 0
+    counter = 0
     full_name = "Null"
     date_joined = "Null"
     contract_length = "Null"
@@ -176,42 +174,37 @@ def getting_player_details(player, name):
 
 
 def compare_last_transfer(url, player_id, club_from_id, club_to_id, transfer_date):
-    if last_transfer is not False:
-        print(f"{last_transfer[0]}\n[{url}, {player_id}, {club_from_id}, {club_to_id}, {transfer_date}]")
-        if last_transfer[0] == [url, player_id, club_from_id, club_to_id, transfer_date]:
-            print("[ERROR]Transfer already listed")
-            print(last_transfer)
+    if last_transfer is True:
+        return True
+    for i in range(len(last_transfer)):
+        if last_transfer[i] == [url, player_id, club_from_id, club_to_id, transfer_date]:
+            last_transfer.pop(i)
             return False
-        return True
-    else:
-        return True
+
 
 
 def get_last_transfer():
-    if os.path.isfile('../Output/Latest_transfersa.json'):  # Checks if the file exists
-        f = open('../Output/Latest_transfersa.json')
+    if os.path.isfile('../Output/latest_transfers.json'):  # Checks if the file exists
+        f = open('../Output/latest_transfers.json')
         data = json.load(f)
         last_transfers = []
         for item in range(len(data)):
-            last_transfers.append([data[str(item)]['Url'], data[str(item)]['Player_id'], data[str(item)]['From club id'], data[str(item)]['To club id'], data[str(item)]['Tranfer date']])
-            print(len(last_transfers))
+            last_transfers.append([data[item]['Url'],
+                                   data[item]['Player_id'],
+                                   data[item]['From club id'],
+                                   data[item]['To club id'],
+                                   data[item]['Tranfer date']
+                                   ])
         return last_transfers
-    else:
-        return False
+    return False
 
 
 def export_data(df):  # Export to json or csv
-    print(12342)
     if not os.path.exists("../Output"):
         os.mkdir("../Output")
     df.to_csv('../Output/Latest_transfersa.csv', index=False)
 
     df.to_json('../Output/Latest_transfersa.json', orient="records")
-
-
-def debug(string):
-
-    return f"[DEBUG] {string}"
 
 
 if __name__ == "__main__":
@@ -226,5 +219,4 @@ if __name__ == "__main__":
     export_data(df)
 
 # todo
-# - Add support for bans
-# -
+# - When found a transfer in latest_transfer.json --> Remove url from list as it's no long necessary.
