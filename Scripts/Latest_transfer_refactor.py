@@ -85,9 +85,13 @@ def make_list_of_players(comp_urls):
         for player_odd, player_even in zip(soup.find_all('tr', {'class': 'odd'}),
                                            soup.find_all('tr', {'class': 'even'})):
             if has_run is False:
-                new_first_transfer = [url, extract(player_odd, url)]
+                new_first_transfer = extract(player_odd, url)
                 if new_first_transfer is not False:
-                    first_transfers.append(new_first_transfer)
+                    new_first_transfer_app = []
+                    new_first_transfer_app.append(url)
+                    for i in new_first_transfer:
+                        new_first_transfer_app.append(i)
+                    first_transfers.append(new_first_transfer_app)
                 has_run = True
             player_extract = extract(player_odd, url)
             if not player_extract:
@@ -145,8 +149,8 @@ def extract(player, url):
     position, date_joined, contract_length, full_name = getting_player_details(
         player, name)
 
-    return[tfm_player_id, name, full_name, position, age, fir_nat, sec_nat, club_from, club_from_tfm_id, club_to,
-           club_to_tfm_id, transfer_date, transfer_type, date_joined.strip(), contract_length.strip()]
+    return tfm_player_id, name, full_name, position, age, fir_nat, sec_nat, club_from, club_from_tfm_id, club_to,\
+           club_to_tfm_id, transfer_date, transfer_type, date_joined.strip(), contract_length.strip()
 
 
 def getting_player_details(player, name):
@@ -174,12 +178,12 @@ def getting_player_details(player, name):
 
 
 def compare_last_transfer(url, player_id, club_from_id, club_to_id, transfer_date):
-    if last_transfer is True:
-        return True
+    if last_transfer is False:
+        return False
     for i in range(len(last_transfer)):
         if last_transfer[i] == [url, player_id, club_from_id, club_to_id, transfer_date]:
             last_transfer.pop(i)
-            return False
+            return True
 
 
 
@@ -202,9 +206,9 @@ def get_last_transfer():
 def export_data(df):  # Export to json or csv
     if not os.path.exists("../Output"):
         os.mkdir("../Output")
-    df.to_csv('../Output/Latest_transfersa.csv', index=False)
+    df.to_csv('../Output/Latest_transfers.csv', index=False)
 
-    df.to_json('../Output/Latest_transfersa.json', orient="records")
+    df.to_json('../Output/Latest_transfers.json', orient="records")
 
 
 if __name__ == "__main__":
